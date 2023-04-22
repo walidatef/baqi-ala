@@ -12,4 +12,7 @@
     <string name="time">الوقت</string>
     <string name="date">تاريخ</string>
     <string name="add">أضافة</string>
+    <string name="enterDateTime">ادخل الموعد</string>
+    <string name="dateTest">00 / 00 / 0000</string>
+    <string name="timeTest">00 : 00 AM</string>
 </resources>
