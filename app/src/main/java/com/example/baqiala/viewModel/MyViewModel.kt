@@ -1,26 +1,37 @@
 package com.example.baqiala.viewModel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import android.content.Context
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.baqiala.data.Note
+import com.example.baqiala.data.NoteDao
 import com.example.baqiala.dataBase.MyDatabase
 import kotlinx.coroutines.launch
+import java.text.ParsePosition
 
-class MyViewModel(application: Application) : AndroidViewModel(application) {
-    private val noteData = MyDatabase.getDatabase(application).noteDoa()
-    val notes: LiveData<List<Note>> = noteData.getAllUsers()
+class MyViewModel : ViewModel() {
+    private lateinit var noteDoa: NoteDao
+    lateinit var notes: LiveData<MutableList<Note>>
 
-    fun addUser(note: Note) {
+
+    fun getAllNotes(context: Context) {
+
+        noteDoa = MyDatabase.getDatabase(context).noteDoa()
+
         viewModelScope.launch {
-            noteData.insertNote(note)
+            // perform some long-running or asynchronous task
+            notes = noteDoa.getAllNotes()
+
         }
     }
 
-    fun deleteUser(note: Note) {
+    fun deleteNote(context: Context,mNote: Note) {
+        noteDoa = MyDatabase.getDatabase(context).noteDoa()
         viewModelScope.launch {
-            noteData.deleteNote(note)
+            noteDoa.deleteNote(mNote)
         }
     }
+
+
 }

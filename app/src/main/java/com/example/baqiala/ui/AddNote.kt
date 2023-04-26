@@ -1,6 +1,5 @@
-package com.example.baqiala
+package com.example.baqiala.ui
 
-import android.R
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -9,15 +8,17 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.widget.addTextChangedListener
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import com.example.baqiala.R
 import com.example.baqiala.data.Note
+import com.example.baqiala.dataBase.MyDatabase
 import com.example.baqiala.databinding.ActivityAddNoteBinding
-import com.example.baqiala.databinding.BottomSheetLayoutBinding
-import com.example.baqiala.viewModel.MyViewModel
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.Calendar
+import kotlin.properties.Delegates
 
 class AddNote : AppCompatActivity() {
     private lateinit var binding: ActivityAddNoteBinding
@@ -34,14 +35,17 @@ class AddNote : AppCompatActivity() {
     private var isTimeAdd = false
     private lateinit var name: String
     private var nameNotEmpty: Boolean = false
-    private lateinit var viewModel: MyViewModel
+    private val noteDoa = MyDatabase.getDatabase(this).noteDoa()
+    private var startDay by Delegates.notNull<Int>()
+    private var startMonth by Delegates.notNull<Int>()
+    private var startYear by Delegates.notNull<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddNoteBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this)[MyViewModel::class.java]
+
 
         binding.dismissBtn.setOnClickListener {
             finish()
@@ -49,18 +53,18 @@ class AddNote : AppCompatActivity() {
 
         binding.dateBtn.setOnClickListener {
             val currentDate = Calendar.getInstance()
-            val startYear = currentDate.get(Calendar.YEAR)
-            val startMonth = currentDate.get(Calendar.MONTH)
-            val startDay = currentDate.get(Calendar.DAY_OF_MONTH)
+            startYear = currentDate.get(Calendar.YEAR)
+            startMonth = currentDate.get(Calendar.MONTH)
+            startDay = currentDate.get(Calendar.DAY_OF_MONTH)
 
             DatePickerDialog(
                 this,
                 { _, year, month, day ->
                     mYear = year
-                    mMonth = month
+                    mMonth = month + 1
                     mDay = day
 
-                    binding.date.text = "$year - $month - $day"
+                    binding.date.text = "$year - $mMonth - $day"
                     isAddDate = true
                 }, startYear, startMonth, startDay
             ).show()
@@ -74,28 +78,41 @@ class AddNote : AppCompatActivity() {
             TimePickerDialog(
                 this,
                 { _, hourOfDay, minute ->
-                    val amPm = if (hourOfDay < 12) "AM" else "PM"
-                    var hour = hourOfDay % 12
-                    if (hour == 0) {
-                        hour = 12
+                    val selectedTime = Calendar.getInstance().apply {
+                        set(Calendar.YEAR,mYear)
+                        set(Calendar.MONTH,mMonth-1)
+                        set(Calendar.DAY_OF_MONTH,mDay)
+                        set(Calendar.HOUR_OF_DAY, hourOfDay)
+                        set(Calendar.MINUTE, minute)
+                    }
+                    // Check if the selected time is bigger than the current time
+                    if (selectedTime.after(Calendar.getInstance())) {
+                        val amPm = if (hourOfDay < 12) "AM" else "PM"
+                        var hour = hourOfDay % 12
+                        if (hour == 0) {
+                            hour = 12
+                        }
+                        mHour = hourOfDay
+                        mMinute = minute
+                        this.amPm = amPm
+                        binding.time.text = "$hour : $minute $amPm"
+                        isTimeAdd = true
+
+                    } else {
+                        // Show an error message
+                        Snackbar.make(it, getString(R.string.numNotGreater), Snackbar.LENGTH_LONG)
+                            .show()
+
                     }
 
-                    mHour = hour
-                    mMinute = minute
-                    this.amPm = amPm
 
-
-                    binding.time.text = "$hour : $minute $amPm"
-                    isTimeAdd = true
                 }, startHour, startMinute, false
             ).show()
-        }
 
-        //TODO listener for not empty editText
+        }
 
         binding.date.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -126,7 +143,7 @@ class AddNote : AppCompatActivity() {
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 nameNotEmpty = !p0.isNullOrBlank()
-                name=p0.toString()
+                name = p0.toString()
                 addBtn()
 
             }
@@ -139,11 +156,12 @@ class AddNote : AppCompatActivity() {
 
         binding.addBtn.setOnClickListener {
             if (isAddDate && isTimeAdd && nameNotEmpty)
-                addNote(name, mDay,mMonth,mYear,mHour,mMinute)
+                addNote(name, mDay, mMonth, mYear, mHour, mMinute)
         }
 
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun addNote(
         name: String,
         day: Int,
@@ -152,7 +170,22 @@ class AddNote : AppCompatActivity() {
         hour: Int,
         minute: Int
     ) {
-        viewModel.addUser(Note(name=name, day=day, month=month, year=year, hour=hour,minute=minute))
+        GlobalScope.launch(Dispatchers.IO) {
+
+            noteDoa.insertNote(
+                Note(
+                    name = name,
+                    day = day,
+                    month = month,
+                    year = year,
+                    hour = hour,
+                    minute = minute
+                )
+            )
+        }
+
+
+
 
         finish()
     }
@@ -163,5 +196,11 @@ class AddNote : AppCompatActivity() {
         } else {
             binding.addBtn.alpha = 0.2F
         }
+    }
+
+    fun getTime(): Long {
+
+        val time = Calendar.getInstance()
+        return time.timeInMillis
     }
 }

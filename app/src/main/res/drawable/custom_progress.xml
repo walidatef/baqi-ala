@@ -1,0 +1,24 @@
+<!-- progress_bar_custom.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <corners android:radius="5dp" />
+            <solid android:color="#77808080" />
+        </shape>
+    </item>
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="rectangle">
+                <corners android:radius="5dp" />
+                <solid android:color="@color/black" />
+
+            </shape>
+
+        </clip>
+        <bitmap
+            android:gravity="center_vertical"
+            android:src="@drawable/ic_clock"
+            />
+    </item>
+
+</layer-list>

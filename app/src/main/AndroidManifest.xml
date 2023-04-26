@@ -12,11 +12,11 @@
         android:theme="@style/Theme.BaqiAla"
         tools:targetApi="31">
         <activity
-            android:name=".AddNote"
+            android:name=".ui.AddNote"
             android:exported="false"
-            android:parentActivityName=".MainActivity"/>
+            android:parentActivityName=".ui.MainActivity"/>
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
