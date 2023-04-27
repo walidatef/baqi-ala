@@ -1,6 +1,8 @@
 package com.example.baqiala.ui
+
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -10,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.baqiala.R
 import com.example.baqiala.adapters.MyAdapter
 import com.example.baqiala.databinding.ActivityMainBinding
+import com.example.baqiala.databinding.MyNoteLayoutBinding
 import com.example.baqiala.utils.SwipeToDeleteCallback
 import com.example.baqiala.viewModel.MyViewModel
 
@@ -17,6 +20,7 @@ import com.example.baqiala.viewModel.MyViewModel
 class MainActivity : AppCompatActivity() {
 
     private lateinit var _binding: ActivityMainBinding
+    private lateinit var progressLayout: MyNoteLayoutBinding
     private lateinit var bottomSheetFragment: BottomSheetFragment
     private val viewModel by viewModels<MyViewModel>()
     private lateinit var adapter: MyAdapter
@@ -31,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.getAllNotes(this)
         viewModel.notes.observe(this) { data ->
             // update UI with data
-            adapter = MyAdapter(data, this,viewModel)
+            adapter = MyAdapter(data, this, viewModel)
             _binding.recycler.adapter = adapter
             val swipeToDeleteCallback = ContextCompat.getDrawable(this, R.drawable.delete_24)?.let {
                 SwipeToDeleteCallback(adapter, it)
@@ -53,4 +57,6 @@ class MainActivity : AppCompatActivity() {
         bottomSheetFragment.isCancelable = true
         bottomSheetFragment.show(supportFragmentManager, BottomSheetFragment.TAG)
     }
+
+  
 }

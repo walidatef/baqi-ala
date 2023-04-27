@@ -78,7 +78,8 @@
                 <RelativeLayout
                     android:id="@+id/days_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
 
 
                     <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -118,7 +119,8 @@
                 <RelativeLayout
                     android:id="@+id/hours_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
 
 
                     <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -159,7 +161,8 @@
                 <RelativeLayout
                     android:id="@+id/minutes_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
 
                     <com.google.android.material.progressindicator.CircularProgressIndicator
                         android:id="@+id/minutes_stay_bar"
@@ -201,7 +204,8 @@
                 <RelativeLayout
                     android:id="@+id/seconds_layout"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    >
 
                     <com.google.android.material.progressindicator.CircularProgressIndicator
                         android:id="@+id/seconds_stay_bar"
